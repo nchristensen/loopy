@@ -1,4 +1,4 @@
-git+https://github.com/inducer/pytools.git
+git+https://github.com/nchristensen/pytools.git==2020.4.4
 git+https://github.com/inducer/islpy.git
 git+https://github.com/inducer/cgen.git
 git+https://github.com/inducer/pyopencl.git
