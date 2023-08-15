@@ -196,7 +196,7 @@ class TranslationUnit:
 
     def __post_init__(self):
         assert isinstance(self.entrypoints, frozenset)
-        assert isinstance(self.callables_table, Map)
+        #assert isinstance(self.callables_table, Map)
 
         object.__setattr__(self, "_program_executor_cache", {})
 
@@ -265,8 +265,15 @@ class TranslationUnit:
             # update the callable kernel
             new_in_knl_callable = self.callables_table[kernel.name].copy(
                     subkernel=kernel)
-            new_callables = self.callables_table.delete(kernel.name).set(
+            if hasattr(self.callables_table, "delete"):
+                new_callables = self.callables_table.delete(kernel.name).set(
                     kernel.name, new_in_knl_callable)
+            elif hasattr(self.callables_table, "remove"):
+                new_callables = self.callables_table.remove(kernel.name).set(
+                    kernel.name, new_in_knl_callable)
+            else:
+                raise RuntimeError("Map object has no remove or delete methods")
+
             return self.copy(callables_table=new_callables)
         else:
             # add a new callable kernel
