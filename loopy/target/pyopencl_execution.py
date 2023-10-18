@@ -334,6 +334,7 @@ class PyOpenCLExecutor(ExecutorBase):
         import pyopencl as cl
 
         #FIXME: redirect to "translation unit" level option as well.
+        print(dev_code)
         cl_program = (
                 cl.Program(self.context, dev_code)
                 .build(options=t_unit[self.entrypoint].options.build_options))
@@ -341,6 +342,32 @@ class PyOpenCLExecutor(ExecutorBase):
         cl_kernels = _Kernels()
         for dp in cl_program.kernel_names.split(";"):
             setattr(cl_kernels, dp, getattr(cl_program, dp))
+
+        if True:
+            from mpi4py import MPI
+            import pickle
+            from os.path import exists
+            from frozendict import frozendict
+            comm = MPI.COMM_WORLD
+            rank = comm.Get_rank()
+            file_name = "call_count_" + str(rank) + ".pkl"
+            if exists(file)
+                file = open(file_name, mode='rt')
+                d = pickle.load(file)
+                file.close()
+                d = dict(d)
+            else:
+                d = {}
+
+            if t_unit.default_entrypoint.name in d:
+                d[t_unit.default_entrypoint.name} += 1
+            else:
+                d[t_unit.default_entrypoint.name] = 1
+
+            file = open(file_name, mode='wt')
+            pickle.dump(d, file)
+            file.close()
+
 
         return _KernelInfo(
                 cl_kernels=cl_kernels,
