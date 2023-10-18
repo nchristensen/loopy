@@ -345,27 +345,33 @@ class PyOpenCLExecutor(ExecutorBase):
 
         if True:
             from mpi4py import MPI
-            import pickle
+            import json
             from os.path import exists
-            from frozendict import frozendict
             comm = MPI.COMM_WORLD
             rank = comm.Get_rank()
-            file_name = "call_count_" + str(rank) + ".pkl"
-            if exists(file)
+            file_name = "call_count_" + str(rank) + ".json"
+            if exists(file_name):
                 file = open(file_name, mode='rt')
-                d = pickle.load(file)
+                d = json.load(file)
                 file.close()
-                d = dict(d)
             else:
                 d = {}
 
+            #from tagtune.utils import unique_program_id 
+            #pid = unique_program_id(t_unit, attempt_normalization=False)
+            # Count by both pid and kernel name.
+            #if pid in d:
+            #    d[pid] += 1
+            #else:
+            #    d[pid] = 1
+
             if t_unit.default_entrypoint.name in d:
-                d[t_unit.default_entrypoint.name} += 1
+                d[t_unit.default_entrypoint.name] += 1
             else:
                 d[t_unit.default_entrypoint.name] = 1
 
             file = open(file_name, mode='wt')
-            pickle.dump(d, file)
+            json.dump(d, file)
             file.close()
 
 
