@@ -343,36 +343,6 @@ class PyOpenCLExecutor(ExecutorBase):
         for dp in cl_program.kernel_names.split(";"):
             setattr(cl_kernels, dp, getattr(cl_program, dp))
 
-        if True:
-            from mpi4py import MPI
-            import json
-            from os.path import exists
-            comm = MPI.COMM_WORLD
-            rank = comm.Get_rank()
-            file_name = "call_count_" + str(rank) + ".json"
-            if exists(file_name):
-                file = open(file_name, mode='rt')
-                d = json.load(file)
-                file.close()
-            else:
-                d = {}
-
-            #from tagtune.utils import unique_program_id 
-            #pid = unique_program_id(t_unit, attempt_normalization=False)
-            # Count by both pid and kernel name.
-            #if pid in d:
-            #    d[pid] += 1
-            #else:
-            #    d[pid] = 1
-
-            if t_unit.default_entrypoint.name in d:
-                d[t_unit.default_entrypoint.name] += 1
-            else:
-                d[t_unit.default_entrypoint.name] = 1
-
-            file = open(file_name, mode='wt')
-            json.dump(d, file)
-            file.close()
 
 
         return _KernelInfo(
@@ -415,6 +385,39 @@ class PyOpenCLExecutor(ExecutorBase):
             kwargs = self.packing_controller(kwargs)
 
         translation_unit_info = self.translation_unit_info(self.arg_to_dtype(kwargs))
+
+        #print("SAVING KERNEL CALL")
+        if True:
+            from mpi4py import MPI
+            import json
+            from os.path import exists
+            comm = MPI.COMM_WORLD
+            rank = comm.Get_rank()
+            file_name = "call_count_" + str(rank) + ".json"
+            if exists(file_name):
+                file = open(file_name, mode='rt')
+                d = json.load(file)
+                file.close()
+            else:
+                d = {}
+
+            #from tagtune.utils import unique_program_id 
+            #pid = unique_program_id(t_unit, attempt_normalization=False)
+            # Count by both pid and kernel name.
+            #if pid in d:
+            #    d[pid] += 1
+            #else:
+            #    d[pid] = 1
+
+            if self.t_unit.default_entrypoint.name in d:
+                d[self.t_unit.default_entrypoint.name] += 1
+            else:
+                d[self.t_unit.default_entrypoint.name] = 1
+
+            file = open(file_name, mode='wt')
+            json.dump(d, file)
+            file.close()
+
 
         return translation_unit_info.invoker(
                 translation_unit_info.cl_kernels, queue, allocator, wait_for,
